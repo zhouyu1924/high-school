@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { generateSchoolContent, generateSchoolImage } from '../services/aiService';
-import { Save, Plus, Trash, Wand2, Key, Image as ImageIcon, Loader2, Users, Settings, Menu as MenuIcon, Edit2, Server, FileText, Newspaper } from 'lucide-react';
-import { NavItem, FacultyMember, NewsItem } from '../types';
+import { Save, Plus, Trash, Wand2, Key, Image as ImageIcon, Loader2, Users, Settings, Menu as MenuIcon, Edit2, Server, FileText, Newspaper, LayoutTemplate } from 'lucide-react';
+import { NavItem, FacultyMember, NewsItem, LinkItem } from '../types';
 
 const Admin: React.FC = () => {
   const { data, updateData, isAdmin, login, logout } = useAppContext();
   const [password, setPassword] = useState('');
-  const [activeTab, setActiveTab] = useState<'general' | 'navigation' | 'faculty' | 'pages' | 'news'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'navigation' | 'faculty' | 'pages' | 'news' | 'footer'>('general');
   
   // AI States
   const [genLoading, setGenLoading] = useState(false);
@@ -162,6 +162,27 @@ const Admin: React.FC = () => {
       setEditingNews(null);
   }
 
+  // Footer Handlers
+  const handleFooterChange = (field: string, value: any) => {
+      updateData({ footer: { ...data.footer, [field]: value } });
+  };
+  
+  const handleFooterLinkChange = (index: number, field: keyof LinkItem, value: string) => {
+      const newLinks = [...data.footer.usefulLinks];
+      newLinks[index] = { ...newLinks[index], [field]: value };
+      handleFooterChange('usefulLinks', newLinks);
+  };
+
+  const addFooterLink = () => {
+      const newLink: LinkItem = { id: Date.now().toString(), label: 'New Link', url: '#' };
+      handleFooterChange('usefulLinks', [...data.footer.usefulLinks, newLink]);
+  };
+
+  const removeFooterLink = (index: number) => {
+      const newLinks = data.footer.usefulLinks.filter((_, i) => i !== index);
+      handleFooterChange('usefulLinks', newLinks);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row max-h-screen">
       
@@ -186,6 +207,9 @@ const Admin: React.FC = () => {
               </button>
               <button onClick={() => setActiveTab('faculty')} className={`w-full flex items-center gap-3 px-4 py-3 rounded text-left transition ${activeTab === 'faculty' ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-900'}`}>
                   <Users size={18} /> Faculty & Staff
+              </button>
+              <button onClick={() => setActiveTab('footer')} className={`w-full flex items-center gap-3 px-4 py-3 rounded text-left transition ${activeTab === 'footer' ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-900'}`}>
+                  <LayoutTemplate size={18} /> Footer & Footer
               </button>
           </nav>
           <div className="p-4 border-t border-blue-900">
@@ -456,6 +480,88 @@ const Admin: React.FC = () => {
                             <button onClick={handleSaveFaculty} className="w-full bg-ice-blue text-white py-3 rounded font-bold hover:bg-blue-800 transition">Save Faculty Member</button>
                         </div>
                     )}
+                </div>
+            )}
+            
+            {/* TAB: FOOTER */}
+            {activeTab === 'footer' && (
+                <div className="space-y-6">
+                    {/* About Section */}
+                    <div className="bg-white p-6 rounded shadow-sm border border-gray-200">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4">Footer: About Section</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Title</label>
+                                <input className="w-full border p-2 rounded" value={data.footer.aboutTitle} onChange={e => handleFooterChange('aboutTitle', e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Description</label>
+                                <textarea className="w-full border p-2 rounded h-24" value={data.footer.aboutText} onChange={e => handleFooterChange('aboutText', e.target.value)} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Columns Titles */}
+                    <div className="bg-white p-6 rounded shadow-sm border border-gray-200">
+                         <h2 className="text-xl font-bold text-gray-800 mb-4">Footer: Column Titles</h2>
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Main Menu Title</label>
+                                <input className="w-full border p-2 rounded" value={data.footer.mainMenuTitle} onChange={e => handleFooterChange('mainMenuTitle', e.target.value)} />
+                                <p className="text-xs text-gray-400 mt-1">Links are taken from the top navigation bar.</p>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Useful Links Title</label>
+                                <input className="w-full border p-2 rounded" value={data.footer.usefulLinksTitle} onChange={e => handleFooterChange('usefulLinksTitle', e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Contact Title</label>
+                                <input className="w-full border p-2 rounded" value={data.footer.contactTitle} onChange={e => handleFooterChange('contactTitle', e.target.value)} />
+                            </div>
+                         </div>
+                    </div>
+
+                    {/* Useful Links List */}
+                    <div className="bg-white p-6 rounded shadow-sm border border-gray-200">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-gray-800">Footer: Useful Links List</h2>
+                            <button onClick={addFooterLink} className="flex items-center gap-1 text-sm bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 transition font-semibold">
+                                <Plus size={16} /> Add Link
+                            </button>
+                        </div>
+                        <div className="space-y-3">
+                            {data.footer.usefulLinks.map((link, index) => (
+                                <div key={link.id} className="flex gap-4 items-center bg-gray-50 p-3 rounded border border-gray-200">
+                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <input value={link.label} onChange={(e) => handleFooterLinkChange(index, 'label', e.target.value)} className="border p-2 rounded text-sm focus:ring-2 focus:ring-ice-blue focus:outline-none" placeholder="Label" />
+                                        <input value={link.url} onChange={(e) => handleFooterLinkChange(index, 'url', e.target.value)} className="border p-2 rounded text-sm text-gray-600 font-mono focus:ring-2 focus:ring-ice-blue focus:outline-none" placeholder="URL / Path" />
+                                    </div>
+                                    <button onClick={() => removeFooterLink(index)} className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded transition">
+                                        <Trash size={18} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Contact Info */}
+                    <div className="bg-white p-6 rounded shadow-sm border border-gray-200">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4">Footer: Contact Information</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="md:col-span-2">
+                                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Address</label>
+                                <textarea className="w-full border p-2 rounded h-20" value={data.footer.contactAddress} onChange={e => handleFooterChange('contactAddress', e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Phone</label>
+                                <input className="w-full border p-2 rounded" value={data.footer.contactPhone} onChange={e => handleFooterChange('contactPhone', e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Email</label>
+                                <input className="w-full border p-2 rounded" value={data.footer.contactEmail} onChange={e => handleFooterChange('contactEmail', e.target.value)} />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 

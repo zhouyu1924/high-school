@@ -37,6 +37,24 @@ export interface PageContent {
   heroImage: string;
 }
 
+export interface LinkItem {
+  id: string;
+  label: string;
+  url: string;
+}
+
+export interface FooterData {
+  aboutTitle: string;
+  aboutText: string;
+  mainMenuTitle: string;
+  usefulLinksTitle: string;
+  usefulLinks: LinkItem[];
+  contactTitle: string;
+  contactAddress: string;
+  contactPhone: string;
+  contactEmail: string;
+}
+
 export interface SchoolData {
   name: string;
   motto: string;
@@ -45,6 +63,7 @@ export interface SchoolData {
   events: EventItem[];
   faculty: FacultyMember[];
   pages: { [key: string]: PageContent };
+  footer: FooterData;
   apiKey: string;
 }
 

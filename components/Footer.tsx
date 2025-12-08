@@ -4,15 +4,16 @@ import { useAppContext } from '../context/AppContext';
 
 const Footer: React.FC = () => {
   const { data } = useAppContext();
+  const { footer } = data;
 
   return (
     <footer className="bg-ice-blue text-white pt-16 pb-8">
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
         {/* Column 1: About */}
         <div>
-          <h3 className="font-serif text-lg font-bold mb-4">About {data.name}</h3>
-          <p className="text-blue-200 text-sm leading-relaxed mb-4">
-            {data.name} has been providing a distinctive, innovative preparatory education for young leaders since 1895. Located in the heart of London.
+          <h3 className="font-serif text-lg font-bold mb-4">{footer.aboutTitle}</h3>
+          <p className="text-blue-200 text-sm leading-relaxed mb-4 whitespace-pre-wrap">
+            {footer.aboutText}
           </p>
           <div className="flex gap-4">
             <Facebook size={20} className="hover:text-ice-gold cursor-pointer" />
@@ -23,7 +24,7 @@ const Footer: React.FC = () => {
 
         {/* Column 2: Main Menu */}
         <div>
-          <h3 className="font-serif text-lg font-bold mb-4">Main Menu</h3>
+          <h3 className="font-serif text-lg font-bold mb-4">{footer.mainMenuTitle}</h3>
           <ul className="space-y-2 text-sm text-blue-200">
             {data.navItems.slice(0, 5).map(item => (
                 <li key={item.id}><a href={item.path} className="hover:text-white hover:underline">{item.label}</a></li>
@@ -33,31 +34,31 @@ const Footer: React.FC = () => {
 
         {/* Column 3: Useful Links */}
         <div>
-           <h3 className="font-serif text-lg font-bold mb-4">Useful Links</h3>
+           <h3 className="font-serif text-lg font-bold mb-4">{footer.usefulLinksTitle}</h3>
            <ul className="space-y-2 text-sm text-blue-200">
-             <li><a href="#" className="hover:text-white hover:underline">Careers</a></li>
-             <li><a href="#" className="hover:text-white hover:underline">Calendar</a></li>
-             <li><a href="#" className="hover:text-white hover:underline">Tuition & Financial Aid</a></li>
-             <li><a href="#" className="hover:text-white hover:underline">Safeguarding</a></li>
-             <li><a href="#" className="hover:text-white hover:underline">School Directory</a></li>
+             {footer.usefulLinks.map(link => (
+                 <li key={link.id}>
+                     <a href={link.url} className="hover:text-white hover:underline">{link.label}</a>
+                 </li>
+             ))}
            </ul>
         </div>
 
         {/* Column 4: Contact */}
         <div>
-            <h3 className="font-serif text-lg font-bold mb-4">Connect with Us</h3>
+            <h3 className="font-serif text-lg font-bold mb-4">{footer.contactTitle}</h3>
             <ul className="space-y-4 text-sm text-blue-200">
                 <li className="flex gap-2 items-start">
                     <MapPin size={16} className="mt-1 flex-shrink-0" />
-                    <span>123 Regents Park Road,<br/>London, NW1 8XL</span>
+                    <span className="whitespace-pre-wrap">{footer.contactAddress}</span>
                 </li>
                 <li className="flex gap-2 items-center">
                     <Phone size={16} className="flex-shrink-0" />
-                    <span>+44 (0) 20 7946 0123</span>
+                    <span>{footer.contactPhone}</span>
                 </li>
                 <li className="flex gap-2 items-center">
                     <Mail size={16} className="flex-shrink-0" />
-                    <span>admissions@icealan.ac.uk</span>
+                    <a href={`mailto:${footer.contactEmail}`} className="hover:underline">{footer.contactEmail}</a>
                 </li>
             </ul>
         </div>

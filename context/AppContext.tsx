@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AppContextType, SchoolData, NavItem } from '../types';
+import { AppContextType, SchoolData, NavItem, FooterData } from '../types';
 
 const defaultNavItems: NavItem[] = [
   { id: '1', label: 'About', path: '/about' },
@@ -44,6 +44,24 @@ const defaultPages = {
   }
 };
 
+const defaultFooter: FooterData = {
+  aboutTitle: "About IceAlan High School",
+  aboutText: "IceAlan High School has been providing a distinctive, innovative preparatory education for young leaders since 1895. Located in the heart of London.",
+  mainMenuTitle: "Main Menu",
+  usefulLinksTitle: "Useful Links",
+  usefulLinks: [
+      { id: '1', label: 'Careers', url: '#' },
+      { id: '2', label: 'Calendar', url: '#' },
+      { id: '3', label: 'Tuition & Financial Aid', url: '#' },
+      { id: '4', label: 'Safeguarding', url: '#' },
+      { id: '5', label: 'School Directory', url: '/directory' },
+  ],
+  contactTitle: "Connect with Us",
+  contactAddress: "123 Regents Park Road,\nLondon, NW1 8XL",
+  contactPhone: "+44 (0) 20 7946 0123",
+  contactEmail: "admissions@icealan.ac.uk"
+};
+
 const defaultData: SchoolData = {
   name: "IceAlan High School",
   motto: "Excellence. Integrity. Innovation.",
@@ -65,7 +83,8 @@ const defaultData: SchoolData = {
     { id: '3', name: 'Mr. James Thorne', role: 'Director of Music', department: 'Arts', email: 'j.thorne@icealan.ac.uk', image: 'https://picsum.photos/200/200?random=12', bio: 'Former conductor for the Royal Philharmonic, leading our award-winning orchestra.' },
     { id: '4', name: 'Ms. Emily White', role: 'Head of Sixth Form', department: 'Pastoral', email: 'e.white@icealan.ac.uk', image: 'https://picsum.photos/200/200?random=13', bio: 'Dedicated to student welfare and university guidance.' },
   ],
-  pages: defaultPages
+  pages: defaultPages,
+  footer: defaultFooter
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -88,6 +107,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             if (serverData && typeof serverData === 'object') {
                 const mergedData = { ...defaultData, ...serverData };
                 if (!serverData.pages) mergedData.pages = defaultPages;
+                // Migration: Ensure footer exists if loading old data
+                if (!serverData.footer) mergedData.footer = defaultFooter; 
+                
                 setData(mergedData);
             }
         } else {
