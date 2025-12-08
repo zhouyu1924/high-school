@@ -77,31 +77,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isStaff, setIsStaff] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load data from PHP Backend on Mount
+  // Load data from Node.js Backend on Mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // In production, api.php should be at the root. 
-        // If developing locally without PHP, this might fail, so we catch it.
-        const response = await fetch('/api.php');
+        // Use the Node API endpoint
+        const response = await fetch('/api/data');
         if (response.ok) {
             const serverData = await response.json();
             if (serverData && typeof serverData === 'object') {
-                // Merge server data with default structure to ensure all fields exist
-                // We must ensure 'pages' object exists in incoming data to avoid crash if old JSON exists
                 const mergedData = { ...defaultData, ...serverData };
-                // Ensure deep merge for pages if needed, but shallow merge of top keys usually enough if structure is stable
                 if (!serverData.pages) mergedData.pages = defaultPages;
                 setData(mergedData);
-            } else {
-                saveToBackend(defaultData);
             }
         } else {
-            // If 404 or other error, use default
-             console.log("PHP backend not found or error, using default.");
+             console.log("Backend returned error, using default.");
+             // If backend exists but no file, try to init it
+             saveToBackend(defaultData);
         }
       } catch (error) {
-        console.warn("Could not fetch from backend, using default data.", error);
+        console.warn("Could not fetch from backend (offline or build mode?), using default data.", error);
       } finally {
         setLoading(false);
       }
@@ -110,10 +105,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     fetchData();
   }, []);
 
-  // Helper to save to PHP
+  // Helper to save to Node.js Backend
   const saveToBackend = async (newData: SchoolData) => {
       try {
-          await fetch('/api.php', {
+          await fetch('/api/data', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(newData)
