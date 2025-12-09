@@ -17,17 +17,18 @@ const Navbar: React.FC = () => {
           <Link to="#" className="hover:text-ice-light transition">Parents</Link>
           <Link to="#" className="hover:text-ice-light transition">Students</Link>
           <Link to="#" className="hover:text-ice-light transition">Alumni</Link>
+          
           <div className="flex items-center gap-2 border-l border-blue-800 pl-4">
-            <button onClick={() => navigate('/staff')} className="flex items-center gap-1 hover:text-ice-light">
-               <User size={12} /> {isStaff ? 'Staff Portal' : 'Staff Login'}
-            </button>
-            <button onClick={() => navigate('/admin')} className="flex items-center gap-1 hover:text-ice-light ml-4">
-               <Lock size={12} /> {isAdmin ? 'Admin' : 'Admin Login'}
-            </button>
+             {/* Login buttons hidden from public navbar. Access via /admin or /staff */}
             {(isAdmin || isStaff) && (
-              <button onClick={logout} className="ml-4 hover:text-red-300">Logout</button>
+              <div className="flex items-center gap-4">
+                  {isAdmin && <span className="text-ice-gold font-bold">Admin Mode</span>}
+                  {isStaff && <span className="text-green-400 font-bold">Staff Mode</span>}
+                  <button onClick={logout} className="hover:text-red-300">Logout</button>
+              </div>
             )}
           </div>
+
           <div className="flex items-center bg-blue-900 rounded px-2 py-0.5 ml-4">
             <input 
                 type="text" 

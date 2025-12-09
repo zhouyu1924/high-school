@@ -65,6 +65,8 @@ const defaultFooter: FooterData = {
 const defaultData: SchoolData = {
   name: "IceAlan High School",
   motto: "Excellence. Integrity. Innovation.",
+  adminPassword: "admin",
+  staffPassword: "staff",
   navItems: defaultNavItems,
   apiKey: "",
   news: [
@@ -148,9 +150,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  const login = (role: 'admin' | 'staff') => {
-    if (role === 'admin') setIsAdmin(true);
-    if (role === 'staff') setIsStaff(true);
+  const login = (role: 'admin' | 'staff', passwordInput: string): boolean => {
+    if (role === 'admin') {
+        const targetPass = data.adminPassword || 'admin';
+        if (passwordInput === targetPass) {
+            setIsAdmin(true);
+            return true;
+        }
+    }
+    if (role === 'staff') {
+        const targetPass = data.staffPassword || 'staff';
+        if (passwordInput === targetPass) {
+            setIsStaff(true);
+            return true;
+        }
+    }
+    return false;
   };
 
   const logout = () => {

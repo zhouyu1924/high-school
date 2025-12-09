@@ -58,6 +58,8 @@ export interface FooterData {
 export interface SchoolData {
   name: string;
   motto: string;
+  adminPassword?: string;
+  staffPassword?: string;
   navItems: NavItem[];
   news: NewsItem[];
   events: EventItem[];
@@ -72,6 +74,6 @@ export interface AppContextType {
   updateData: (newData: Partial<SchoolData>) => void;
   isStaff: boolean;
   isAdmin: boolean;
-  login: (role: 'admin' | 'staff') => void;
+  login: (role: 'admin' | 'staff', passwordInput: string) => boolean;
   logout: () => void;
 }

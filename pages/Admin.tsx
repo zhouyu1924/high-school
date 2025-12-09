@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { generateSchoolContent, generateSchoolImage } from '../services/aiService';
-import { Save, Plus, Trash, Wand2, Key, Image as ImageIcon, Loader2, Users, Settings, Menu as MenuIcon, Edit2, Server, FileText, Newspaper, LayoutTemplate } from 'lucide-react';
-import { NavItem, FacultyMember, NewsItem, LinkItem } from '../types';
+import { Save, Plus, Trash, Wand2, Key, Image as ImageIcon, Loader2, Users, Settings, Menu as MenuIcon, Edit2, Server, FileText, Newspaper, LayoutTemplate, ShieldAlert } from 'lucide-react';
+import { NavItem, FacultyMember, NewsItem, LinkItem, PageContent } from '../types';
+
+// The pages that should always be editable
+const REQUIRED_PAGES = ['about', 'admissions', 'academics', 'student-life', 'support', 'news'];
 
 const Admin: React.FC = () => {
   const { data, updateData, isAdmin, login, logout } = useAppContext();
@@ -33,16 +36,13 @@ const Admin: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                    if(password === 'admin') login('admin');
-                    else alert('Incorrect password.');
+                    if(!login('admin', password)) alert('Incorrect password.');
                 }
             }}
           />
-          <p className="text-xs text-gray-400 mb-4">Hint: Default password is <strong>admin</strong></p>
           <button
             onClick={() => {
-                if(password === 'admin') login('admin');
-                else alert('Incorrect password. Try "admin"');
+                if(!login('admin', password)) alert('Incorrect password.');
             }}
             className="w-full bg-ice-blue text-white py-2 rounded hover:bg-blue-800 transition font-semibold"
           >
@@ -137,6 +137,27 @@ const Admin: React.FC = () => {
   };
 
   // Pages Handler
+  const ensurePageExists = (key: string) => {
+      // If page exists in data, do nothing
+      if (data.pages[key]) return;
+
+      // If missing, initialize it
+      const newPage: PageContent = {
+          title: key.charAt(0).toUpperCase() + key.slice(1).replace('-', ' '),
+          content: 'Content coming soon...',
+          heroImage: 'https://picsum.photos/1920/1080?grayscale'
+      };
+      
+      updateData({
+          pages: { ...data.pages, [key]: newPage }
+      });
+  };
+
+  const handlePageSelect = (key: string) => {
+      ensurePageExists(key);
+      setSelectedPageKey(key);
+  }
+
   const handlePageChange = (field: 'title' | 'content' | 'heroImage', value: string) => {
       if (!data.pages[selectedPageKey]) return;
       const updatedPage = { ...data.pages[selectedPageKey], [field]: value };
@@ -194,7 +215,7 @@ const Admin: React.FC = () => {
           </div>
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
               <button onClick={() => setActiveTab('general')} className={`w-full flex items-center gap-3 px-4 py-3 rounded text-left transition ${activeTab === 'general' ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-900'}`}>
-                  <Settings size={18} /> General & AI
+                  <Settings size={18} /> General & Passwords
               </button>
               <button onClick={() => setActiveTab('navigation')} className={`w-full flex items-center gap-3 px-4 py-3 rounded text-left transition ${activeTab === 'navigation' ? 'bg-blue-800 text-white' : 'text-blue-200 hover:bg-blue-900'}`}>
                   <MenuIcon size={18} /> Navigation
@@ -238,37 +259,69 @@ const Admin: React.FC = () => {
 
             {/* TAB: GENERAL */}
             {activeTab === 'general' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="bg-white p-6 rounded shadow-sm border border-gray-200">
-                        <h2 className="text-xl font-bold mb-4 text-gray-800">School Identity</h2>
-                        <div className="mb-4">
-                            <label className="block text-sm font-bold mb-2 text-gray-600">School Name</label>
-                            <input value={data.name} onChange={(e) => updateData({ name: e.target.value })} className="w-full border p-2 rounded focus:ring-2 focus:ring-ice-blue focus:outline-none" />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-bold mb-2 text-gray-600">Motto</label>
-                            <div className="flex gap-2">
-                                <input value={data.motto} onChange={(e) => updateData({ motto: e.target.value })} className="w-full border p-2 rounded focus:ring-2 focus:ring-ice-blue focus:outline-none" />
-                                <button onClick={handleGenerateMotto} disabled={genLoading} className="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 disabled:opacity-50 transition">
-                                    {genLoading ? <Loader2 className="animate-spin" /> : <Wand2 size={20} />}
-                                </button>
+                <div className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="bg-white p-6 rounded shadow-sm border border-gray-200">
+                            <h2 className="text-xl font-bold mb-4 text-gray-800">School Identity</h2>
+                            <div className="mb-4">
+                                <label className="block text-sm font-bold mb-2 text-gray-600">School Name</label>
+                                <input value={data.name} onChange={(e) => updateData({ name: e.target.value })} className="w-full border p-2 rounded focus:ring-2 focus:ring-ice-blue focus:outline-none" />
                             </div>
+                            <div className="mb-4">
+                                <label className="block text-sm font-bold mb-2 text-gray-600">Motto</label>
+                                <div className="flex gap-2">
+                                    <input value={data.motto} onChange={(e) => updateData({ motto: e.target.value })} className="w-full border p-2 rounded focus:ring-2 focus:ring-ice-blue focus:outline-none" />
+                                    <button onClick={handleGenerateMotto} disabled={genLoading} className="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 disabled:opacity-50 transition">
+                                        {genLoading ? <Loader2 className="animate-spin" /> : <Wand2 size={20} />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-6 rounded shadow-sm border border-gray-200">
+                            <h2 className="text-xl font-bold mb-4 text-gray-800">Logo Generator</h2>
+                            <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 p-8 rounded mb-4 min-h-[150px] bg-gray-50">
+                                {generatedImgUrl ? (
+                                    <img src={generatedImgUrl} alt="Generated Logo" className="w-32 h-32 object-contain" />
+                                ) : (
+                                    <p className="text-gray-400 text-sm">No generated logo yet</p>
+                                )}
+                            </div>
+                            <button onClick={handleGenerateLogo} disabled={imgLoading} className="w-full bg-ice-blue text-white py-2 rounded flex items-center justify-center gap-2 hover:bg-blue-800 disabled:opacity-50 transition font-semibold">
+                                {imgLoading ? <Loader2 className="animate-spin" /> : <ImageIcon size={18} />}
+                                Generate New Crest
+                            </button>
                         </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded shadow-sm border border-gray-200">
-                        <h2 className="text-xl font-bold mb-4 text-gray-800">Logo Generator</h2>
-                        <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 p-8 rounded mb-4 min-h-[150px] bg-gray-50">
-                            {generatedImgUrl ? (
-                                <img src={generatedImgUrl} alt="Generated Logo" className="w-32 h-32 object-contain" />
-                            ) : (
-                                <p className="text-gray-400 text-sm">No generated logo yet</p>
-                            )}
+                    {/* Security Section */}
+                    <div className="bg-white p-6 rounded shadow-sm border border-gray-200 border-l-4 border-l-red-500">
+                        <div className="flex items-center gap-2 mb-4">
+                            <ShieldAlert size={20} className="text-red-500" />
+                            <h2 className="text-xl font-bold text-gray-800">Security Settings</h2>
                         </div>
-                        <button onClick={handleGenerateLogo} disabled={imgLoading} className="w-full bg-ice-blue text-white py-2 rounded flex items-center justify-center gap-2 hover:bg-blue-800 disabled:opacity-50 transition font-semibold">
-                            {imgLoading ? <Loader2 className="animate-spin" /> : <ImageIcon size={18} />}
-                            Generate New Crest
-                        </button>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Admin Password</label>
+                                <input 
+                                    type="text"
+                                    className="w-full border p-2 rounded bg-gray-50 font-mono"
+                                    value={data.adminPassword || 'admin'}
+                                    onChange={(e) => updateData({ adminPassword: e.target.value })}
+                                />
+                                <p className="text-[10px] text-gray-400 mt-1">Default: "admin"</p>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Staff Password</label>
+                                <input 
+                                    type="text"
+                                    className="w-full border p-2 rounded bg-gray-50 font-mono"
+                                    value={data.staffPassword || 'staff'}
+                                    onChange={(e) => updateData({ staffPassword: e.target.value })}
+                                />
+                                <p className="text-[10px] text-gray-400 mt-1">Default: "staff"</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
@@ -308,10 +361,11 @@ const Admin: React.FC = () => {
                     <div className="mb-6 border-b pb-4">
                         <h2 className="text-xl font-bold text-gray-800 mb-4">Edit Page Content</h2>
                         <div className="flex gap-2 overflow-x-auto pb-2">
-                            {Object.keys(data.pages).map(key => (
+                            {/* Force show standard pages even if they aren't in data yet */}
+                            {REQUIRED_PAGES.map(key => (
                                 <button 
                                     key={key} 
-                                    onClick={() => setSelectedPageKey(key)}
+                                    onClick={() => handlePageSelect(key)}
                                     className={`px-4 py-2 rounded text-sm font-semibold capitalize whitespace-nowrap ${selectedPageKey === key ? 'bg-ice-blue text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                                 >
                                     {key.replace('-', ' ')}
@@ -320,7 +374,7 @@ const Admin: React.FC = () => {
                         </div>
                     </div>
                     
-                    {data.pages[selectedPageKey] && (
+                    {data.pages[selectedPageKey] ? (
                         <div className="space-y-4 animate-in fade-in duration-300">
                              <div>
                                 <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Page Title</label>
@@ -347,6 +401,10 @@ const Admin: React.FC = () => {
                                 />
                                 <p className="text-xs text-gray-400 mt-1">This field supports standard text formatting (newlines are preserved).</p>
                              </div>
+                        </div>
+                    ) : (
+                        <div className="text-center py-8">
+                             <p>Loading or Initializing page data...</p>
                         </div>
                     )}
                 </div>

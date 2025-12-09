@@ -33,6 +33,8 @@ const ensureDataFile = async () => {
         const defaultData = {
             name: "IceAlan High School",
             motto: "Excellence. Integrity. Innovation.",
+            adminPassword: "admin",
+            staffPassword: "staff",
             navItems: [
                 { id: '1', label: 'About', path: '/about' },
                 { id: '2', label: 'Admissions', path: '/admissions' },
@@ -45,7 +47,33 @@ const ensureDataFile = async () => {
             news: [],
             events: [],
             faculty: [],
-            pages: {},
+            pages: {
+                about: {
+                    title: "About IceAlan",
+                    content: "IceAlan High School was founded on the principles of academic rigor and character development. Our campus, located in the heart of the city, provides a sanctuary for learning and growth.\n\nWe believe in fostering a community where every student is valued and challenged to reach their full potential.",
+                    heroImage: "https://picsum.photos/1920/600?grayscale"
+                },
+                admissions: {
+                    title: "Admissions",
+                    content: "We welcome applications from students who demonstrate intellectual curiosity. Our admissions process is holistic.\n\nKey Dates:\n- Application Deadline: January 15th",
+                    heroImage: "https://picsum.photos/1920/601?grayscale"
+                },
+                academics: {
+                    title: "Academic Excellence",
+                    content: "Our curriculum is designed to challenge students and prepare them for top-tier universities worldwide.",
+                    heroImage: "https://picsum.photos/1920/602?grayscale"
+                },
+                "student-life": {
+                    title: "Student Life",
+                    content: "Life at IceAlan extends far beyond the classroom. With over 50 clubs and societies, there is something for everyone.",
+                    heroImage: "https://picsum.photos/1920/603?grayscale"
+                },
+                support: {
+                    title: "Support IceAlan",
+                    content: "The IceAlan Annual Fund supports scholarships, facility upgrades, and faculty development.",
+                    heroImage: "https://picsum.photos/1920/604?grayscale"
+                }
+            },
             footer: {
                 aboutTitle: "About IceAlan",
                 aboutText: "A prestigious institution.",

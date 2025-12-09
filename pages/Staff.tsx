@@ -20,16 +20,14 @@ const Staff: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                    if(password === 'staff') login('staff');
-                    else alert('Incorrect password.');
+                    if(!login('staff', password)) alert('Incorrect password.');
                 }
             }}
           />
-           <p className="text-xs text-gray-400 mb-4">Hint: Default password is <strong>staff</strong></p>
+           <p className="text-xs text-gray-400 mb-4">Hint: Contact admin if you lost your password.</p>
           <button
             onClick={() => {
-                if(password === 'staff') login('staff');
-                else alert('Incorrect password. Try "staff"');
+                if(!login('staff', password)) alert('Incorrect password.');
             }}
             className="w-full bg-ice-gold text-white py-2 rounded hover:bg-yellow-600 transition font-semibold"
           >
