@@ -11,13 +11,18 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'school_data.json');
+const DIST_DIR = path.join(__dirname, 'dist');
+
+console.log('--- Server Starting ---');
+console.log('Current Directory:', __dirname);
+console.log('Serving Static Files from:', DIST_DIR);
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
 // Serve Static files from the React build (dist)
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(DIST_DIR));
 
 // Helper to ensure data file exists
 const ensureDataFile = async () => {
@@ -41,6 +46,17 @@ const ensureDataFile = async () => {
             events: [],
             faculty: [],
             pages: {},
+            footer: {
+                aboutTitle: "About IceAlan",
+                aboutText: "A prestigious institution.",
+                mainMenuTitle: "Menu",
+                usefulLinksTitle: "Links",
+                usefulLinks: [],
+                contactTitle: "Contact",
+                contactAddress: "London, UK",
+                contactPhone: "+44 1234 5678",
+                contactEmail: "info@icealan.ac.uk"
+            },
             apiKey: ""
         };
         await fs.writeFile(DATA_FILE, JSON.stringify(defaultData, null, 2));
@@ -77,9 +93,14 @@ app.post('/api/data', async (req, res) => {
 });
 
 // --- Catch-All Route for React Router (SPA) ---
-// This ensures that refreshing a page like /about works by sending index.html
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    const indexPath = path.join(DIST_DIR, 'index.html');
+    res.sendFile(indexPath, (err) => {
+        if (err) {
+            console.error("Error sending index.html:", err);
+            res.status(500).send("Error loading application. Please ensure 'npm run build' has been run on the server.");
+        }
+    });
 });
 
 // Start Server
